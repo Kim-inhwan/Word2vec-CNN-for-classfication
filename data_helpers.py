@@ -2,6 +2,7 @@ from os.path import exists
 from konlpy.tag import Okt
 from multiprocessing import Manager
 from collections import Counter
+from gensim.models import Word2Vec
 from tqdm import tqdm
 import pickle
 import itertools
@@ -102,7 +103,7 @@ def load_vocab(file_path):
             vocabulary_inv = voc['vocab_inv']
             return vocabulary, vocabulary_inv
     else:
-        assert 'vocabulary is not existed'
+        assert 'vocabulary does not exist'
 
 
 """
@@ -164,3 +165,27 @@ def prepare_train_set(pos_path, neg_path, vocab_path, d_type):
 
     return x_train, y_train, x_test, y_test, vocabulary, vocabulary_inv
 
+
+"""
+w2v값을 weight로 사용
+"""
+
+
+def train_w2v(sentences, save_path, sg=1, size=300, min_count=1, window=10, sample=1e-3):
+    w2v_model = Word2Vec(sentences, workers=4,
+                         size=size, min_count=min_count,
+                         window=window, sample=sample, sg=sg)
+    w2v_model.init_sims(replace=True)
+    w2v_model.save(save_path)
+
+
+def load_w2v_weight(w2v_path, vocabulary_inv):
+    if exists(w2v_path):
+        embedding_model = Word2Vec.load(w2v_path)
+    else:
+        assert 'model does not exist'
+
+    embedding_weights = {key: embedding_model[word] if word in embedding_model else
+                         np.random.uniform(-0.25, 0.25, embedding_model.vector_size)
+                         for key, word in vocabulary_inv.items()}
+    return embedding_weights

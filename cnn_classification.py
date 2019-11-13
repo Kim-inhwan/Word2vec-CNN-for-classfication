@@ -1,5 +1,6 @@
 import data_helpers as dhp
 import numpy as np
+from os.path import exists
 from keras.models import Model, load_model
 from keras.layers import Dense, Dropout, Flatten, Input, MaxPooling1D, Convolution1D, Embedding
 from keras.layers import Concatenate
@@ -16,9 +17,8 @@ def build_vocab(txt_path, vocab_path, d_type):
 
 # CNN 학습코드
 # Based on https://github.com/alexander-rakhlin/CNN-for-Sentence-Classification-in-Keras
-def train(pos_path, neg_path, vocab_path, d_type, model_path, is_save=False):
+def train(pos_path, neg_path, vocab_path, d_type, model_path, w2v_path='', is_save=False):
     # Model type. See Kim Yoon's Convolutional Neural Networks for Sentence Classification, Section 3
-    # 현재 CNN-rand만 가능!
     model_type = "CNN-rand"  # CNN-rand|CNN-non-static|CNN-static
 
     # Model Hyperparameters
@@ -35,9 +35,6 @@ def train(pos_path, neg_path, vocab_path, d_type, model_path, is_save=False):
     # Prepossessing parameters
     sequence_length = 400
     max_words = 5000
-
-    # select word2vec model
-    l_type = 'skipgram'
 
     # Data Preparation
     print("Load data...")
@@ -56,15 +53,15 @@ def train(pos_path, neg_path, vocab_path, d_type, model_path, is_save=False):
     # Prepare embedding layer weights and convert inputs for static model
     print("Model type is", model_type)
     if model_type in ["CNN-non-static", "CNN-static"]:
-        # 현재는 CNN-rand 만 가능
         embedding_weights = None
-        # embedding_weights = load_w2v_weight(np.vstack((x_train, x_test)), vocabulary_inv,
-        #                                     d_type=d_type, l_type=l_type)
-        # if model_type == "CNN-static":
-        #     x_train = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_train])
-        #     x_test = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_test])
-        #     print("x_train static shape:", x_train.shape)
-        #     print("x_test static shape:", x_test.shape)
+        if exists(w2v_path):
+            embedding_weights = dhp.load_w2v_weight(w2v_path, vocabulary_inv)
+
+            if model_type == "CNN-static":
+                x_train = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_train])
+                x_test = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_test])
+                print("x_train static shape:", x_train.shape)
+                print("x_test static shape:", x_test.shape)
 
     elif model_type == "CNN-rand":
         embedding_weights = None
@@ -152,20 +149,16 @@ def test(model_path, vocab_path, d_type):
 
 if __name__ == '__main__':
     d_type = 'sns'     # news / sns
-    # sentences_path_for_vocab = 'file path for building vocabulary'
-    sentences_path_for_vocab = './data/test.txt'
-    # pos_path = 'file path for positive'
-    pos_path = './data/pos.txt'
-    # neg_path = 'file path for negative'
-    neg_path = './data/neg.txt'
-    # vocab_path = 'file path for vocab'
-    vocab_path = './data/test_vocab.vocab'
+    sentences_path_for_vocab = 'file path for building vocabulary'
+    pos_path = 'file path for positive'
+    neg_path = 'file path for negative'
+    vocab_path = 'file path for vocab'
     is_save = True  # 학습 이후 저장여부
-    # model_path = 'save path for model'  # 저장한다면 저장 경로, 확장자 h5
-    model_path = './data/test.h5'  # 저장한다면 저장 경로, 확장자 h5
+    model_path = 'save path for model'  # 저장한다면 저장 경로, 확장자 h5
+    w2v_path = 'file path for w2v in gensim'    # gensim의 word2vec을 사용할 경우 경로
 
     build_vocab(sentences_path_for_vocab, vocab_path, d_type)   # 첫 vocab 생성 후 실행할 필요 없음. 주석처리 할 것.
-    train(pos_path, neg_path, vocab_path, d_type, model_path, is_save=is_save)
+    train(pos_path, neg_path, vocab_path, d_type, model_path, w2v_path=w2v_path, is_save=is_save)
     test(model_path, vocab_path, d_type)
 
 
