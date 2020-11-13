@@ -23,14 +23,17 @@
 위 그림은 Skip-gram를 사용했을 때 training volume, epoch에 따른 성능 변화이다.
 <img src="./img/training_news_rand.png" />
 위 그림은 random vector를 사용했을 때 training volume, epoch에 따른 성능 변화이다.
-</br>
+<br>  
+
+
 CBOW를 사용한 모델이 Skip-gram를 사용한 모델보다 학습 과정이 조금 더 안정적인 모습을 보였고, random vector를 사용한 모델은 학습 과정이 불안정한 모습을 보였다.
 
 <img src="./img/news_result.png"/> 
 위 그림은 뉴스 기사를 학습한 모델들의 성능 비교이다.
 <img src="./img/twitter_result.png" />
 위 그림은 트윗을 학습한 모델들의 성능 비교이다.
-</br>
+<br>  
+
 
 뉴스 기사를 학습한 모델은 CBOW를 사용했을 때 가장 높은 성능을 보였고, 트윗을 학습한 모델은 Skip-gram을 사용했을 때 가장 높은 성능을 보였다. 또한, random vector를 사용한 모델은 word2vec을 사용한 모델 보다 성능이 낮은 모습을 보였다.
 
