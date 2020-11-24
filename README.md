@@ -1,4 +1,6 @@
 # Word2vec-CNN for sentence classification
+## Publication
+[Jang, Beakcheol, Inhwan Kim, and Jong Wook Kim. "Word2vec convolutional neural networks for classification of news articles and tweets." _PloS one_ 14.8 (2019): e0220976.](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0220976)
 
 ## Motivation
  - 키워드를 기반으로 수집된 웹 데이터는 의도와는 다르게 광고성 혹은 무의미한 내용을 가진 데이터를 분류하지 못함
